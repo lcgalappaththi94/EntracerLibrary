@@ -37,7 +37,7 @@ public class EntracerLib {
             return response.body().string();
         } catch (Exception e) {
             e.printStackTrace();
+            return e.toString();
         }
-        return null;
     }
 }
