@@ -2,6 +2,7 @@ package entracer.chinthika.com.entracerlibrary;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class EntracerLib {
         new RequestTask().execute(this.token, tag, "http://crm.orete.org/api/v1/people");
         while (!concurrentHashMap.containsKey(tag)) ;
         String result= (String) concurrentHashMap.get(tag);
+        Log.i("Result",result);
         return result;
     }
 
