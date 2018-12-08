@@ -5,8 +5,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -17,14 +20,15 @@ import okhttp3.Response;
 public class EntracerLib {
     private String token;
     OkHttpClient client;
-    ConcurrentHashMap concurrentHashMap;
+    Map<String, String> concurrentHashMap;
+    ExecutorService executor;
 
 
     public EntracerLib(String token) {
         this.token = token;
         client = new OkHttpClient();
         concurrentHashMap = new ConcurrentHashMap<String, String>();
-
+        executor = Executors.newFixedThreadPool(10);
     }
 
     public String getPerson(String id) {
@@ -36,49 +40,29 @@ public class EntracerLib {
     }
 
     public String getAllPersons() {
-        String tag = getTag();
-        new RequestTask().execute(this.token, tag, "http://crm.orete.org/api/v1/people");
+        final String tag = getTag();
+        final String url = "http://crm.orete.org/api/v1/people";
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .addHeader("Authorization", new StringBuffer("Token token=").append(token).toString())
+                            .get()
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    concurrentHashMap.put(tag, response.body().string());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    concurrentHashMap.put(tag, e.toString());
+                }
+            }
+        });
+
         while (!concurrentHashMap.containsKey(tag)) ;
-        String result= (String) concurrentHashMap.get(tag);
-        Log.i("Result",result);
+        String result = concurrentHashMap.get(tag);
         return result;
     }
 
-
-    private class RequestTask extends AsyncTask<String, Void, String> {
-
-        String tag;
-
-        @Override
-        protected String doInBackground(String... params) {
-            String token = params[0];
-            tag = params[1];
-            String url = params[2];
-            try {
-                Request request = new Request.Builder()
-                        .url(url)
-                        .addHeader("Authorization", new StringBuffer("Token token=").append(token).toString())
-                        .get()
-                        .build();
-                Response response = client.newCall(request).execute();
-                return response.body().string();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return e.toString();
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            concurrentHashMap.put(tag, result);
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-        }
-    }
 }
