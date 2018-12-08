@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -59,12 +60,40 @@ public class EntracerLib {
         });
 
         while (!concurrentHashMap.containsKey(tag)) ;
-        String result = concurrentHashMap.get(tag);
+        String result = concurrentHashMap.get(tag).replace("{\"person\":", "");
         Gson gson = new Gson();
-        return gson.fromJson(result,Person.class);
+        return gson.fromJson(result.substring(0, result.length() - 1), Person.class);
     }
 
-    public String getAllPersons() {
+    public Person getPersonByEmail(final String email) {
+        final String tag = getTag();
+        final String url = "http://crm.orete.org/api/v1/people/find_by_email";
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    RequestBody body = new FormBody.Builder().add("email", email).build();
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .addHeader("Authorization", new StringBuffer("Token token=").append(token).toString())
+                            .post(body)
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    concurrentHashMap.put(tag, response.body().string());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    concurrentHashMap.put(tag, e.toString());
+                }
+            }
+        });
+
+        while (!concurrentHashMap.containsKey(tag)) ;
+        String result = concurrentHashMap.get(tag).replace("{\"person\":", "");
+        Gson gson = new Gson();
+        return gson.fromJson(result.substring(0, result.length() - 1), Person.class);
+    }
+
+    public Person[] getAllPersons() {
         final String tag = getTag();
         final String url = "http://crm.orete.org/api/v1/people";
         executor.submit(new Runnable() {
@@ -86,10 +115,9 @@ public class EntracerLib {
         });
 
         while (!concurrentHashMap.containsKey(tag)) ;
-        String result = concurrentHashMap.get(tag);
+        String result = concurrentHashMap.get(tag).replace("{\"people\":", "");
         Gson gson = new Gson();
-        gson.fromJson(result,Person.class);
-        return result;
+        return gson.fromJson(result.substring(0, result.length() - 1), Person[].class);
     }
 
 }

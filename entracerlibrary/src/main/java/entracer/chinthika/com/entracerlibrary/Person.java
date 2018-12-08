@@ -1,7 +1,5 @@
 package entracer.chinthika.com.entracerlibrary;
 
-import java.util.Date;
-
 public class Person {
     private String id;
     private String type;
@@ -12,7 +10,7 @@ public class Person {
     private String status;
     private String rating;
     private String department;
-    private  String do_not_call;
+    private String do_not_call;
     private String title;
     private String job_title;
     private String referred_by;
@@ -23,7 +21,7 @@ public class Person {
     private String street_2;
     private String city;
     private String state;
-    private  String zip_code;
+    private String zip_code;
     private String country;
     private String website;
     private String twitter;
@@ -31,10 +29,13 @@ public class Person {
     private String facebook;
     private String skype;
     private String comments;
-    private Person assignee;
+    private Assignee assignee;
+    private CustomField[] custom_fields;
     private Organization[] organizations;
-    private Date created_at;
-    private Date updated_at;
+    private String[] tags;
+    private String created_at;
+    private String updated_at;
+
 
     public String getId() {
         return id;
@@ -260,11 +261,11 @@ public class Person {
         this.comments = comments;
     }
 
-    public Person getAssignee() {
+    public Assignee getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(Person assignee) {
+    public void setAssignee(Assignee assignee) {
         this.assignee = assignee;
     }
 
@@ -276,19 +277,36 @@ public class Person {
         this.organizations = organizations;
     }
 
-    public Date getCreated_at() {
+    public String getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(Date created_at) {
+    public void setCreated_at(String created_at) {
         this.created_at = created_at;
     }
 
-    public Date getUpdated_at() {
+    public String getUpdated_at() {
         return updated_at;
     }
 
-    public void setUpdated_at(Date updated_at) {
+    public void setUpdated_at(String updated_at) {
         this.updated_at = updated_at;
+    }
+
+
+    public CustomField[] getCustom_fields() {
+        return custom_fields;
+    }
+
+    public void setCustom_fields(CustomField[] custom_fields) {
+        this.custom_fields = custom_fields;
+    }
+
+    public String[] getTags() {
+        return tags;
+    }
+
+    public void setTags(String[] tags) {
+        this.tags = tags;
     }
 }
